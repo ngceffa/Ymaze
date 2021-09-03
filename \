@@ -1,0 +1,25 @@
+import warnings
+warnings.filterwarnings( "ignore", module = "matplotlib\..*" )
+import numpy as np
+import matplotlib.pyplot as plt
+import cv2
+
+if __name__ == '__main__':
+
+    y = np.angle(10)
+    x = 10
+    # cap = cv2.VideoCapture(0)
+
+    # # Check if the webcam is opened correctly
+    # if not cap.isOpened():
+    #     raise IOError("Cannot open webcam")
+
+    # while True:
+    #     ret, frame = cap.read()
+    #     cv2.imshow('Input', frame)
+
+    #     c = cv2.waitKey(1)
+    #     if c == 27:
+    #         break
+
+    # cv2.destroyAllWindows()
