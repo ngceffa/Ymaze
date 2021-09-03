@@ -28,7 +28,7 @@ class Observer(object):
                 the tracking: we don't care about the exactly exact shape
                 of things, right?
         - threshold = minimal distance between current and next position
-            (if smaller that this, it's not considered as real transitio)
+            (if smaller that this, it's not considered as real transition)
             (this value is also the diamter of the circles
             drawn when selectiong states)
         """
@@ -122,10 +122,19 @@ class Observer(object):
     def define_states(
         self,
         ):
+        """An interactive image (from the acquired background)
+        is plotted.
+        The User should select seven regions by clicking.
+        The 8th click restarts the process.
+        """
         self.click_me = plt.figure('Select regions')
         self.ax = self.click_me.add_subplot(111)
         self.ax.imshow(self.background)
-        cid = self.click_me.canvas.mpl_connect('button_press_event', self.select_rois)
+        # created just to registered the clicks
+        cid = self.click_me.canvas.mpl_connect(
+            'button_press_event',
+            self.select_rois
+            )
         plt.show()
 
     def select_rois(
@@ -173,11 +182,13 @@ class Observer(object):
             255,
             cv2.THRESH_BINARY
             )
+        # low-pass filtering
         self.thresholded = cv2.morphologyEx(
             self.thresholded,
             cv2.MORPH_CLOSE,
             lowpass_kernel
             )
+        # high-pass filtering
         self.thresholded = cv2.morphologyEx(
             self.thresholded,
             cv2.MORPH_OPEN,
@@ -199,7 +210,7 @@ class Observer(object):
             self.spot = utils.frind_centroid(self.larva)
             self.found_flag = True
         else:
-            self.spot = [-1, -1]
+            self.spot = [-1, -1] # dummy value, if centroid is not found
             self.found_flag = False
 
     def get_state(self):
@@ -210,7 +221,10 @@ class Observer(object):
             pass # do nothing if larva centre is not properly found
         else:
             # instantaneous distance between now and the previous state-point
-            my_distance = np.linalg.norm(np.asarray(self.spot) - np.asarray(self.regions[self.state]))
+            my_distance = np.linalg.norm(
+                np.asarray(self.spot)
+                - np.asarray(self.regions[self.state])
+                )
             # distances between now and all state-points
             n_distances = utils.ymaze_distances(
                 self.spot,
@@ -228,15 +242,16 @@ class Observer(object):
                 self.previous_state = self.state
                 self.first_state_flag = False
                 self.transition_flag = False
-        # the state can create send out a signal
+        # the state can send out a signal
 
     def monitor_transition(self):
-        """This is where the transition
-        between the discrete states is computed.
+        """This is where the transition into a new state is computed.
         The hardcoded numbers follow a naming logic explained in schematics.
-        For now, the important transitions are just after a decision
+        [SCHEMATICS TO BE MADE]
+        For now, the important transitions are:
+        - just after a decision
         (to eventually give immediate reward/punishment)
-        and the ones after reaching a new circle
+        - after reaching a new circle
         (to change the flows)
         """
         if self.transition_flag == False:
